@@ -1,67 +1,132 @@
+/*
+Author:Atul Pandey
+*/
 #include <bits/stdc++.h>
+typedef long long int ll;
+#define pll pair <ll, ll>
+#define pii pair <int, int>
+#define f first
+#define s second
+#define pb push_back
+#define vll vector <ll>
+#define mll map <ll ,ll>
+#define prtq priority_queue <long long>
+#define all(c) c.begin(), c.end()
+#define rep(a,b) for(i=a;i<b;i++)
+#define IOS ios::sync_with_stdio(0); cin.tie(0); cout.tie(0);
+#define inf 1e18
 using namespace std;
+#define Mod 1000000007
+// #define endl "\n"
+////////////////////////////////////////////////////////////////////
 
-const int MAX_N = 10000;
-const int LOG = 14;
-vector<int> children[MAX_N];
-int up[MAX_N][LOG]; // up[v][j] is 2^j-th ancestor of v
-int depth[MAX_N];
-
-void dfs(int a) {
-	for(int b : children[a]) {
-		depth[b] = depth[a] + 1;
-		up[b][0] = a; // a is parent of b
-		for(int j = 1; j < LOG; j++) {
-			up[b][j] = up[up[b][j-1]][j-1];
-		}
-		dfs(b);
-	}
+void fio() // file input output
+{
+#ifndef ONLINE_JUDGE
+  freopen("input1.txt", "r", stdin);
+  freopen("output1.txt", "w", stdout);
+#else
+#endif
 }
 
-int get_lca(int a, int b) { // O(log(N))
-	if(depth[a] < depth[b]) {
-		swap(a, b);
-	}
-	// 1) Get same depth.
-	int k = depth[a] - depth[b];
-	for(int j = LOG - 1; j >= 0; j--) {
-		if(k & (1 << j)) {
-			a = up[a][j]; // parent of a
-		}
-	}
-	// 2) if b was ancestor of a then now a==b
-	if(a == b) {
-		return a;
-	}
-	// 3) move both a and b with powers of two
-	for(int j = LOG - 1; j >= 0; j--) {
-		if(up[a][j] != up[b][j]) {
-			a = up[a][j];
-			b = up[b][j];
-		}
-	}
-	return up[a][0];
+void tim()
+{
+#ifndef ONLINE_JUDGE
+  cerr << "Time elapsed: " << clock() / 1000 << " ms" << endl;
+#endif
+}
+const int N=200011;
+vll adj[N];
+int up[N][20];
+int level[N];
+void dfs(int node,int par,int lvl)
+{
+
+  
+    level[node]=lvl;
+    up[node][0]=par;
+    for(int j=1;j<20;j++)
+    {
+    // if(node==10)cout<<up[8][1];
+        if(up[node][j-1]!=-1)up[node][j] = up[up[node][j-1]][j-1];
+        else up[node][j]=up[node][j-1];
+    }
+    for(int child:adj[node])
+    {
+      if(child!=par)
+        dfs(child,node,lvl+1);
+    }
+    
+  
+
 }
 
-int main() {
-	int n;
-	cin >> n;
-	for(int v = 0; v < n; ++v) {
-		// read children of v
-		int cnt;
-		cin >> cnt;
-		for(int i = 0; i < cnt; i++) {
-			int c;
-			cin >> c;
-			children[v].push_back(c);
-		}
-	}
-	dfs(0);
-	int q;
-	cin >> q;
-	for(int i = 0; i < q; i++) {
-		int a, b;
-		cin >> a >> b;
-		cout << get_lca(a, b) << "\n";
-	}
+    int get_lca(int a,int b)
+    {   
+            if(level[a]<level[b])swap(a,b);
+            int dif=level[a]-level[b];
+            int j=19;
+            while(j>=0)
+            {
+              if(dif&(1<<j)){
+                // cout<<a<<" ";        
+                a=up[a][j];   
+                // dif-=1<<j;     
+              }
+
+              j--;
+            }
+
+           // if b and a on same path then now will be equal to b;
+            // cout<<level[a]<<level[b]<<endl;
+            if(a==b)return a;
+            // cout<<"yes";
+            j=19;
+            while(j>=0)
+            {
+              if(up[a][j]!=up[b][j]){
+                a=up[a][j];
+                b=up[b][j];
+              }
+              j--;
+            }
+            return up[a][0];
+
+    }
+int main()
+{
+  fio();
+  IOS;
+  int t;
+  t = 1;
+  // cin >> t;   
+
+  while (t--)
+  { 
+    int n,m;
+    cin>>n>>m;
+
+    for(int i=2;i<=n;i++){
+      int x,y;
+      cin>>x>>y;
+      adj[x].pb(y);
+      adj[y].pb(x);
+    }
+    dfs(1,-1,1);
+
+    while(m--)
+    {
+      int a,b;
+      cin>>a>>b;
+      // cout<<up[8][1];
+      cout<< level[a]+level[b]-2*level[get_lca(a,b)]<<endl;
+    }
+
+      
+          
+
+
+  }
+  return 0;
+
 }
